@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "description": "Small code-repair benchmark tasks for collecting real agent trajectories.",
+  "tasks": [
+    {
+      "id": "clamp_upper_bound_fix",
+      "prompt": "Fix the bug in clamp so values above the upper bound return the upper bound. Inspect the implementation and tests, make the smallest correct code change, then verify with the test suite.",
+      "fixture_repo": "tests/fixtures/bench_repo_code",
+      "allowed_tools": ["list_files", "read_file", "patch_file", "run_shell"],
+      "step_budget": 8,
+      "expected_artifact": "math_utils.py returns upper for values above the upper bound",
+      "verifier": "python3 -m unittest -q",
+      "category": "code-repair"
+    },
+    {
+      "id": "slugify_whitespace_fix",
+      "prompt": "Fix slugify so extra surrounding or repeated whitespace is collapsed before words are joined with dashes. Inspect the implementation and tests, make the smallest correct code change, then verify with the test suite.",
+      "fixture_repo": "tests/fixtures/bench_repo_slug",
+      "allowed_tools": ["list_files", "read_file", "patch_file", "run_shell"],
+      "step_budget": 8,
+      "expected_artifact": "text_utils.py collapses repeated whitespace while building slugs",
+      "verifier": "python3 -m unittest -q",
+      "category": "code-repair"
+    },
+    {
+      "id": "append_item_default_fix",
+      "prompt": "Fix append_item so repeated calls without an explicit bucket do not share state. Inspect the implementation and tests, make the smallest correct code change, then verify with the test suite.",
+      "fixture_repo": "tests/fixtures/bench_repo_collector",
+      "allowed_tools": ["list_files", "read_file", "patch_file", "run_shell"],
+      "step_budget": 8,
+      "expected_artifact": "collector.py does not reuse a mutable default list across calls",
+      "verifier": "python3 -m unittest -q",
+      "category": "code-repair"
+    }
+  ]
+}

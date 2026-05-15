@@ -10,8 +10,9 @@ import os
 import shutil
 import sys
 import textwrap
+from pathlib import Path
 
-from .models import AnthropicCompatibleModelClient, OllamaModelClient, OpenAICompatibleModelClient
+from .models import AnthropicCompatibleModelClient, DeepSeekChatModelClient, OllamaModelClient, OpenAICompatibleModelClient
 from .runtime import Pico, SessionStore
 from .workspace import WorkspaceContext, middle
 
@@ -20,6 +21,7 @@ DEFAULT_SECRET_ENV_NAMES = (
     "OPENAI_API_TOKEN",
     "ANTHROPIC_API_KEY",
     "ANTHROPIC_AUTH_TOKEN",
+    "DEEPSEEK_API_KEY",
     "RIGHT_CODES_API_KEY",
     "GITHUB_PAT",
     "GH_PAT",
@@ -50,6 +52,8 @@ DEFAULT_OLLAMA_MODEL = "qwen3.5:4b"
 DEFAULT_OLLAMA_HOST = "http://127.0.0.1:11434"
 DEFAULT_OPENAI_MODEL = "gpt-5.4"
 DEFAULT_OPENAI_BASE_URL = "https://www.right.codes/codex/v1"
+DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-flash"
+DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-6"
 DEFAULT_ANTHROPIC_BASE_URL = "https://www.right.codes/claude/v1"
 LEGACY_SECRET_ENV_NAMES_VAR = "MINI_CODING_AGENT_SECRET_ENV_NAMES"
@@ -69,6 +73,11 @@ def _effective_model(args, provider):
         if model:
             return model
         return DEFAULT_OPENAI_MODEL
+    if provider == "deepseek":
+        model = os.environ.get("DEEPSEEK_MODEL")
+        if model:
+            return model
+        return DEFAULT_DEEPSEEK_MODEL
     if provider == "anthropic":
         model = os.environ.get("ANTHROPIC_MODEL")
         if model:
@@ -83,6 +92,20 @@ def _first_env(*names):
         if value:
             return value
     return ""
+
+
+def _load_local_env(path):
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip().lstrip("\ufeff")
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
 
 
 def _configured_secret_names(args):
@@ -109,6 +132,17 @@ def _build_model_client(args):
         base_url = getattr(args, "base_url", None) or os.environ.get("OPENAI_API_BASE") or DEFAULT_OPENAI_BASE_URL
         api_key = os.environ.get("OPENAI_API_KEY", "")
         return OpenAICompatibleModelClient(
+            model=model,
+            base_url=base_url,
+            api_key=api_key,
+            temperature=args.temperature,
+            timeout=getattr(args, "openai_timeout", getattr(args, "ollama_timeout", 300)),
+        )
+    if provider == "deepseek":
+        model = _effective_model(args, provider)
+        base_url = getattr(args, "base_url", None) or os.environ.get("DEEPSEEK_API_BASE") or DEFAULT_DEEPSEEK_BASE_URL
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+        return DeepSeekChatModelClient(
             model=model,
             base_url=base_url,
             api_key=api_key,
@@ -238,14 +272,14 @@ def build_arg_parser():
     )
     parser.add_argument("prompt", nargs="*", help="Optional one-shot prompt.")
     parser.add_argument("--cwd", default=".", help="Workspace directory.")
-    parser.add_argument("--provider", choices=("ollama", "openai", "anthropic"), default="openai", help="Model backend to use.")
+    parser.add_argument("--provider", choices=("ollama", "openai", "deepseek", "anthropic"), default="openai", help="Model backend to use.")
     parser.add_argument(
         "--model",
         default=None,
-        help="Model name override. Defaults to qwen3.5:4b for Ollama, OPENAI_MODEL for openai, and ANTHROPIC_MODEL for anthropic when set.",
+        help="Model name override. Defaults to qwen3.5:4b for Ollama, OPENAI_MODEL for openai, DEEPSEEK_MODEL for deepseek, and ANTHROPIC_MODEL for anthropic when set.",
     )
     parser.add_argument("--host", default=DEFAULT_OLLAMA_HOST, help="Ollama server URL.")
-    parser.add_argument("--base-url", default=None, help="Provider API base URL for openai or anthropic.")
+    parser.add_argument("--base-url", default=None, help="Provider API base URL for openai, deepseek, or anthropic.")
     parser.add_argument("--ollama-timeout", type=int, default=300, help="Ollama request timeout in seconds.")
     parser.add_argument("--openai-timeout", type=int, default=300, help="OpenAI-compatible request timeout in seconds.")
     parser.add_argument("--resume", default=None, help="Session id to resume or 'latest'.")
@@ -266,6 +300,7 @@ def build_arg_parser():
 
 def main(argv=None):
     args = build_arg_parser().parse_args(argv)
+    _load_local_env(Path.cwd() / ".env.local")
     agent = build_agent(args)
 
     model = getattr(agent.model_client, "model", getattr(args, "model", DEFAULT_OLLAMA_MODEL))

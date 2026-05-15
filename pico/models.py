@@ -344,6 +344,81 @@ class OpenAICompatibleModelClient:
         return _extract_openai_text(data)
 
 
+class DeepSeekChatModelClient:
+    def __init__(self, model, base_url, api_key, temperature, timeout):
+        self.model = model
+        self.base_url = str(base_url).rstrip("/")
+        self.api_key = api_key
+        self.temperature = temperature
+        self.timeout = timeout
+        self.supports_prompt_cache = False
+        self.last_completion_metadata = {}
+
+    def complete(self, prompt, max_new_tokens, prompt_cache_key=None, prompt_cache_retention=None):
+        del prompt_cache_key, prompt_cache_retention
+        self.last_completion_metadata = {}
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            "max_tokens": max_new_tokens,
+            "stream": False,
+        }
+        if self.temperature is not None:
+            payload["temperature"] = self.temperature
+
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        request = urllib.request.Request(
+            self.base_url + "/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers=headers,
+            method="POST",
+        )
+        attempts = 3
+        for attempt in range(attempts):
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                    body_text = response.read().decode("utf-8")
+                break
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                if exc.code >= 500 and attempt < attempts - 1:
+                    time.sleep(0.5 * (attempt + 1))
+                    continue
+                raise RuntimeError(f"DeepSeek request failed with HTTP {exc.code}: {body}") from exc
+            except (urllib.error.URLError, RemoteDisconnected) as exc:
+                if attempt < attempts - 1:
+                    time.sleep(0.5 * (attempt + 1))
+                    continue
+                raise RuntimeError(
+                    "Could not reach the DeepSeek backend.\n"
+                    f"Base URL: {self.base_url}\n"
+                    f"Model: {self.model}"
+                ) from exc
+
+        try:
+            data = json.loads(body_text)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError("DeepSeek error: backend returned non-JSON content") from exc
+        if data.get("error"):
+            raise RuntimeError(f"DeepSeek error: {data['error']}")
+        self.last_completion_metadata = {
+            "prompt_cache_supported": False,
+            **_extract_usage_cache_details(data),
+        }
+        text = _extract_openai_text(data)
+        if text:
+            return text
+        raise RuntimeError("DeepSeek error: could not extract text from response")
+
+
 def _extract_anthropic_text(data):
     for item in data.get("content", []):
         if isinstance(item, dict) and item.get("type") == "text":

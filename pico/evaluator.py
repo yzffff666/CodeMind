@@ -41,6 +41,9 @@ REQUIRED_TASK_KEYS = (
 TASK_FIXTURE_ARTIFACTS = {
     "bench_repo_readme": "README.md",
     "bench_repo_patch": "sample.txt",
+    "bench_repo_code": "math_utils.py",
+    "bench_repo_slug": "text_utils.py",
+    "bench_repo_collector": "collector.py",
 }
 
 SCRIPTED_MODEL_OUTPUTS = {

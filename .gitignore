@@ -8,6 +8,8 @@ __pycache__/
 .venv/
 venv/
 uv.lock
+.env
+.env.*
 
 # Packaging
 *.egg-info/
@@ -37,6 +39,8 @@ readme_intro_locked/
 
 # Local docs not intended for publication
 docs/
+!docs/
+!docs/agent-post-training-plan.md
 
 # OS files
 .DS_Store
