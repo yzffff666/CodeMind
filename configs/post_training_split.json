@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "notes": [
+    "训练集用于导出第一版 SFT/DPO 数据；评估集只作为 held-out eval manifest，不参与训练。",
+    "synthetic 数据只用于验证 pipeline，不作为真实训练证据。"
+  ],
+  "settings": {
+    "min_sft_reward": 1.0,
+    "min_dpo_gap": 0.5
+  },
+  "train": {
+    "sft_sources": [
+      {
+        "name": "text_edit_repeated_after_runtime_prompt",
+        "root": "artifacts/real-deepseek-dpo-samples-v3"
+      },
+      {
+        "name": "code_repair_repeated_stable_baseline",
+        "root": "artifacts/real-deepseek-code-repair-dpo-v3"
+      }
+    ],
+    "dpo_sources": [
+      {
+        "name": "text_edit_same_prompt_preferences",
+        "root": "artifacts/real-deepseek-dpo-samples-v3"
+      },
+      {
+        "name": "code_repair_same_prompt_preferences",
+        "root": "artifacts/real-deepseek-code-repair-dpo-v3"
+      }
+    ]
+  },
+  "eval": {
+    "benchmarks": [
+      {
+        "name": "text_edit_mixed_tasks",
+        "root": "artifacts/real-deepseek-trajectories",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-benchmark.json"
+        ],
+        "purpose": "held-out text-edit behavior check"
+      },
+      {
+        "name": "code_repair_suite",
+        "root": "artifacts/real-deepseek-code-repair-suite",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-code-repair-suite-benchmark.json"
+        ],
+        "purpose": "held-out code-repair task-family check; do not train on the same task IDs in larger experiments"
+      }
+    ]
+  },
+  "excluded": [
+    {
+      "name": "synthetic_learning_demo",
+      "root": "artifacts/learning-trajectory-demo",
+      "reason": "synthetic traces validate pipeline only"
+    },
+    {
+      "name": "patch_feedback_v4",
+      "root": "artifacts/real-deepseek-code-repair-dpo-v4",
+      "reason": "matching-context feedback experiment had error migration and is not adopted as baseline"
+    }
+  ]
+}
