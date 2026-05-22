@@ -386,7 +386,23 @@ class DeepSeekChatModelClient:
             try:
                 with urllib.request.urlopen(request, timeout=self.timeout) as response:
                     body_text = response.read().decode("utf-8")
-                break
+                try:
+                    data = json.loads(body_text)
+                except json.JSONDecodeError as exc:
+                    raise RuntimeError("DeepSeek error: backend returned non-JSON content") from exc
+                if data.get("error"):
+                    raise RuntimeError(f"DeepSeek error: {data['error']}")
+                text = _extract_openai_text(data)
+                if text:
+                    self.last_completion_metadata = {
+                        "prompt_cache_supported": False,
+                        **_extract_usage_cache_details(data),
+                    }
+                    return text
+                if attempt < attempts - 1:
+                    time.sleep(0.5 * (attempt + 1))
+                    continue
+                raise RuntimeError("DeepSeek error: could not extract text from response")
             except urllib.error.HTTPError as exc:
                 body = exc.read().decode("utf-8", errors="replace")
                 if exc.code >= 500 and attempt < attempts - 1:
@@ -402,21 +418,6 @@ class DeepSeekChatModelClient:
                     f"Base URL: {self.base_url}\n"
                     f"Model: {self.model}"
                 ) from exc
-
-        try:
-            data = json.loads(body_text)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError("DeepSeek error: backend returned non-JSON content") from exc
-        if data.get("error"):
-            raise RuntimeError(f"DeepSeek error: {data['error']}")
-        self.last_completion_metadata = {
-            "prompt_cache_supported": False,
-            **_extract_usage_cache_details(data),
-        }
-        text = _extract_openai_text(data)
-        if text:
-            return text
-        raise RuntimeError("DeepSeek error: could not extract text from response")
 
 
 def _extract_anthropic_text(data):

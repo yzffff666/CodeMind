@@ -90,12 +90,35 @@ def _subtypes(item: ScoredTrajectory) -> list[str]:
         subtypes.append("verifier_failed")
     if signals.get("invalid_arguments"):
         subtypes.append("invalid_arguments")
+        subtypes.extend(_invalid_argument_subtypes(item))
     if signals.get("failed_tool_calls"):
         subtypes.append("tool_failed")
     if "repeated_identical_call" in signals.get("errors", []):
         subtypes.append("repeated_identical_call")
     if signals.get("path_escape"):
         subtypes.append("path_escape")
+    return subtypes
+
+
+def _invalid_argument_subtypes(item: ScoredTrajectory) -> list[str]:
+    subtypes = []
+    for call in item.summary.tool_calls:
+        if call.error_code != "invalid_arguments":
+            continue
+        result = call.result
+        if call.name == "patch_file":
+            if "old_text must occur exactly once, found 0" in result:
+                subtypes.append("old_text_not_found")
+            elif "old_text must occur exactly once, found " in result:
+                subtypes.append("non_unique_old_text")
+            elif "old_text must not be empty" in result:
+                subtypes.append("missing_old_text")
+            elif "missing new_text" in result:
+                subtypes.append("missing_new_text")
+        if "path is not a file" in result:
+            subtypes.append("bad_file_path")
+        elif "path is not a directory" in result:
+            subtypes.append("bad_directory_path")
     return subtypes
 
 

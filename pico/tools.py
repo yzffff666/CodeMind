@@ -136,7 +136,7 @@ def validate_tool(agent, name, args):
         text = path.read_text(encoding="utf-8")
         count = text.count(old_text)
         if count != 1:
-            raise ValueError(f"old_text must occur exactly once, found {count}")
+            raise ValueError(_patch_match_error(text, old_text, count))
         return
 
     if name == "delegate":
@@ -253,9 +253,17 @@ def tool_patch_file(agent, args):
     text = path.read_text(encoding="utf-8")
     count = text.count(old_text)
     if count != 1:
-        raise ValueError(f"old_text must occur exactly once, found {count}")
+        raise ValueError(_patch_match_error(text, old_text, count))
     path.write_text(text.replace(old_text, str(args["new_text"]), 1), encoding="utf-8")
     return f"patched {path.relative_to(agent.root)}"
+
+
+def _patch_match_error(text, old_text, count):
+    del text, old_text
+    return (
+        f"old_text must occur exactly once, found {count}; "
+        "include more surrounding context so the match is unique"
+    )
 
 
 def tool_delegate(agent, args):

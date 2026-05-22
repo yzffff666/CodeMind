@@ -364,6 +364,8 @@ class Pico:
             - Required tool arguments must not be empty. Do not call read_file, write_file, patch_file, run_shell, or delegate with args={{}}.
             - run_shell already starts in the repo root; do not prepend `cd` unless the task requires another directory.
             - For Python verification, prefer the available interpreter path shown below instead of guessing `python`.
+            - After the requested change is complete and any necessary verification passes, return a final answer instead of spending the remaining budget on extra inspection.
+            - For patch_file, old_text must match exactly once. If a short snippet may appear more than once, include enough surrounding lines to make the match unique.
 
             Runtime hints:
             - Python interpreter: {python_command}
