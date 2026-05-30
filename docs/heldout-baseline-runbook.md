@@ -16,6 +16,12 @@
 python scripts\run_heldout_deepseek_baseline.py
 ```
 
+如果 `python` 指向 WindowsApps 的占位启动器，可能会直接失败且没有输出。可以改用真实 Python 路径，例如：
+
+```powershell
+C:\Users\13670\AppData\Local\Programs\Python\Python311\python.exe scripts\run_heldout_deepseek_baseline.py
+```
+
 成功后会生成：
 
 - `artifacts/heldout-deepseek-baseline-v1.json`
@@ -30,7 +36,16 @@ python scripts\run_heldout_deepseek_baseline.py
 - `failed`：失败任务数量。
 - `failure_category_counts`：失败类型分布。
 
+当前 DeepSeek baseline v1 的结果：
+
+- 任务数：2
+- 通过：1
+- 失败：1
+- pass rate：0.5
+- 主要失败类型：`verifier_failed`
+
+失败样例是 `profile_status_ready`：模型把 `Status: draft` 改成了 `Status: ready`，但 verifier 要求精确包含 `Status: ready for held-out evaluation`。这类 badcase 说明模型理解了大方向，但没有严格执行评测条件。
+
 ## 为什么这一步重要
 
 SFT 前先跑 baseline，SFT 后再跑同一份 held-out benchmark，才能比较模型行为是否真的变好。这里评估的不是 loss，而是 agent 在未见过任务上的工具使用、代码修改、verifier 通过和 final answer 返回能力。
-
