@@ -47,6 +47,10 @@
         "benchmark_artifacts": [
           "artifacts/real-deepseek-exact-instruction-v1.json"
         ]
+      },
+      {
+        "name": "exact_instruction_repeated_preferences_v1",
+        "root": "artifacts/real-deepseek-exact-instruction-dpo-v1"
       }
     ],
     "dpo_sources": [
@@ -72,6 +76,10 @@
         "benchmark_artifacts": [
           "artifacts/real-deepseek-exact-instruction-v1.json"
         ]
+      },
+      {
+        "name": "exact_instruction_repeated_preferences_v1",
+        "root": "artifacts/real-deepseek-exact-instruction-dpo-v1"
       }
     ]
   },

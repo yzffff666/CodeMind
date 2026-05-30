@@ -26,6 +26,16 @@ DeepSeek baseline 在该训练 benchmark 上：
 
 其中 `policy_mode_strict_collection` 是成功轨迹，可以作为 SFT candidate；`release_status_candidate_review` 的文件修改通过了 verifier，但没有及时返回 final，适合用于 badcase 分析。
 
+随后对 `release_status_candidate_review` 做了 4 次 repeated sampling：
+
+- 成功：1
+- 失败：3
+- verifier passed：4
+- 主要失败类型：`completion_without_final`
+- DPO pairs：3
+
+这批 pair 的 chosen 是及时返回 final 的成功轨迹，rejected 是虽然文件修改正确、但没有在 step limit 内 final 的轨迹。它更像是在训练 agent 偏好“完成 verifier 条件后及时停止并返回 final answer”。
+
 ## 学习点
 
 这一步不是直接训练，而是在做针对性数据增强：
@@ -36,4 +46,3 @@ DeepSeek baseline 在该训练 benchmark 上：
 4. 只把高质量成功轨迹导入 SFT，失败轨迹用于 badcase 或 DPO 候选。
 
 这就是后训练里常见的闭环：评测发现问题，数据针对问题补齐，再用 held-out eval 重新验证。
-
