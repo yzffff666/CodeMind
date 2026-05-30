@@ -18,7 +18,14 @@
 2. SFT 后用同一份 held-out benchmark 再跑一遍。
 3. 对比 pass rate、verifier pass rate、final-answer return rate、平均 reward、failure subtype 分布。
 
+训练前 DeepSeek baseline 可以直接运行：
+
+```powershell
+python scripts\run_heldout_deepseek_baseline.py
+```
+
+运行说明见 `docs/heldout-baseline-runbook.md`。
+
 ## 面试表达
 
 可以这样说：项目不只是在收集成功样本，也专门拆出了 held-out benchmark，用来避免训练集和评测集 prompt 泄漏。这样后续微调前后的变化可以被复现和诊断，而不是只展示 loss 下降。
-
