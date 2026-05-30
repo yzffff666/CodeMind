@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "description": "Training-only exact-instruction tasks for collecting trajectories that address precise verifier wording without leaking held-out eval prompts.",
+  "tasks": [
+    {
+      "id": "release_status_candidate_review",
+      "prompt": "In the release notes fixture, update the status line from pending to the exact text 'Status: ready for candidate review'. Make the smallest correct edit and return a final answer after the verifier condition is satisfied.",
+      "fixture_repo": "tests/fixtures/bench_repo_release",
+      "allowed_tools": ["list_files", "read_file", "patch_file"],
+      "step_budget": 6,
+      "expected_artifact": "RELEASE.md status says ready for candidate review",
+      "verifier": "python3 -c \"from pathlib import Path; text = Path('RELEASE.md').read_text(encoding='utf-8'); assert 'Status: ready for candidate review' in text; assert 'Status: pending' not in text\"",
+      "category": "train-exact-text-edit"
+    },
+    {
+      "id": "policy_mode_strict_collection",
+      "prompt": "In the collection policy fixture, update the mode line from relaxed to the exact text 'Mode: strict trajectory collection'. Make the smallest correct edit and return a final answer after the verifier condition is satisfied.",
+      "fixture_repo": "tests/fixtures/bench_repo_policy",
+      "allowed_tools": ["list_files", "read_file", "patch_file"],
+      "step_budget": 6,
+      "expected_artifact": "POLICY.md mode says strict trajectory collection",
+      "verifier": "python3 -c \"from pathlib import Path; text = Path('POLICY.md').read_text(encoding='utf-8'); assert 'Mode: strict trajectory collection' in text; assert 'Mode: relaxed' not in text\"",
+      "category": "train-exact-text-edit"
+    }
+  ]
+}

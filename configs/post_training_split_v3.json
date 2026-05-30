@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "notes": [
-    "v2 用于扩大训练候选池，不声称是严格无泄漏评估配置。",
-    "当前 benchmark 任务较少，部分新采集轨迹与旧 eval prompt 重叠；后续正式 base-vs-SFT 评估需要新增 held-out tasks。",
-    "synthetic 数据只用于验证 pipeline，不作为真实训练证据。"
+    "v3 在 v2 训练候选池基础上加入 exact-instruction 真实轨迹，用于针对 held-out baseline 暴露的精确短语执行问题做数据增强。",
+    "exact-instruction 训练任务与 held-out eval 使用不同 fixture、不同 prompt 和不同目标短语，避免直接把评测题加入训练集。",
+    "held-out eval 只用于 base-vs-SFT 对比，不进入 train_sft 或 train_dpo。"
   ],
   "settings": {
     "min_sft_reward": 1.0,
@@ -40,6 +40,13 @@
       {
         "name": "slugify_repeated_v2",
         "root": "artifacts/real-deepseek-slugify-dpo-v2"
+      },
+      {
+        "name": "exact_instruction_text_edit_v1",
+        "root": "artifacts/real-deepseek-exact-instruction-v1",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-exact-instruction-v1.json"
+        ]
       }
     ],
     "dpo_sources": [
@@ -58,6 +65,13 @@
       {
         "name": "slugify_preferences_v2",
         "root": "artifacts/real-deepseek-slugify-dpo-v2"
+      },
+      {
+        "name": "exact_instruction_text_edit_v1",
+        "root": "artifacts/real-deepseek-exact-instruction-v1",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-exact-instruction-v1.json"
+        ]
       }
     ]
   },
@@ -77,7 +91,7 @@
         "benchmark_artifacts": [
           "artifacts/real-deepseek-benchmark.json"
         ],
-        "purpose": "reference eval only; prompt overlap exists with v2 train candidate pool"
+        "purpose": "reference eval only; prompt overlap exists with older train candidate pools"
       },
       {
         "name": "code_repair_suite_reference_only",
@@ -85,7 +99,7 @@
         "benchmark_artifacts": [
           "artifacts/real-deepseek-code-repair-suite-benchmark.json"
         ],
-        "purpose": "reference eval only; prompt overlap exists with v2 train candidate pool"
+        "purpose": "reference eval only; prompt overlap exists with older train candidate pools"
       }
     ]
   },
@@ -99,6 +113,11 @@
       "name": "patch_feedback_v4",
       "root": "artifacts/real-deepseek-code-repair-dpo-v4",
       "reason": "matching-context feedback experiment had error migration and is not adopted as baseline"
+    },
+    {
+      "name": "heldout_deepseek_baseline_v1",
+      "root": "artifacts/heldout-deepseek-baseline-v1",
+      "reason": "held-out eval is reserved for comparison and must not be used as training data"
     }
   ]
 }

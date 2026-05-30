@@ -46,6 +46,8 @@ TASK_FIXTURE_ARTIFACTS = {
     "bench_repo_collector": "collector.py",
     "bench_repo_profile": "PROFILE.md",
     "bench_repo_stats": "stats.py",
+    "bench_repo_release": "RELEASE.md",
+    "bench_repo_policy": "POLICY.md",
 }
 
 SCRIPTED_MODEL_OUTPUTS = {
@@ -112,6 +114,14 @@ SCRIPTED_MODEL_OUTPUTS = {
     "average_divisor_fix": [
         '<tool name="patch_file" path="stats.py"><old_text>return sum(values) / (len(values) - 1)</old_text><new_text>return sum(values) / len(values)</new_text></tool>',
         "<tool name=\"run_shell\" command=\"python -m unittest -q\"/>",
+        "<final>Done.</final>",
+    ],
+    "release_status_candidate_review": [
+        '<tool name="patch_file" path="RELEASE.md"><old_text>Status: pending</old_text><new_text>Status: ready for candidate review</new_text></tool>',
+        "<final>Done.</final>",
+    ],
+    "policy_mode_strict_collection": [
+        '<tool name="patch_file" path="POLICY.md"><old_text>Mode: relaxed</old_text><new_text>Mode: strict trajectory collection</new_text></tool>',
         "<final>Done.</final>",
     ],
 }

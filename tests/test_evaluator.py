@@ -45,6 +45,19 @@ def test_load_heldout_eval_benchmark_validates_schema():
     }
 
 
+def test_load_exact_instruction_train_benchmark_validates_schema():
+    benchmark = load_benchmark(Path("benchmarks/exact_instruction_train_tasks.json"))
+
+    assert benchmark["schema_version"] == 1
+    assert [task["id"] for task in benchmark["tasks"]] == [
+        "release_status_candidate_review",
+        "policy_mode_strict_collection",
+    ]
+    assert Counter(task["category"] for task in benchmark["tasks"]) == {
+        "train-exact-text-edit": 2,
+    }
+
+
 def test_load_benchmark_rejects_missing_required_task_fields(tmp_path):
     benchmark_path = tmp_path / "bad-benchmark.json"
     benchmark_path.write_text(
