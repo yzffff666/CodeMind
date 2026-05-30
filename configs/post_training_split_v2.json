@@ -64,6 +64,12 @@
   "eval": {
     "benchmarks": [
       {
+        "name": "heldout_eval_v1",
+        "benchmark_path": "benchmarks/heldout_eval_tasks.json",
+        "baseline_artifact": "artifacts/heldout-deepseek-baseline-v1.json",
+        "purpose": "formal held-out eval for future base-vs-SFT comparison; do not include these trajectories in train_sft or train_dpo"
+      },
+      {
         "name": "text_edit_mixed_tasks_reference_only",
         "root": "artifacts/real-deepseek-trajectories",
         "benchmark_artifacts": [

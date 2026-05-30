@@ -31,6 +31,20 @@ def test_load_benchmark_validates_fixed_schema():
         assert task["step_budget"] > 0
 
 
+def test_load_heldout_eval_benchmark_validates_schema():
+    benchmark = load_benchmark(Path("benchmarks/heldout_eval_tasks.json"))
+
+    assert benchmark["schema_version"] == 1
+    assert [task["id"] for task in benchmark["tasks"]] == [
+        "profile_status_ready",
+        "average_divisor_fix",
+    ]
+    assert Counter(task["category"] for task in benchmark["tasks"]) == {
+        "heldout-text-edit": 1,
+        "heldout-code-repair": 1,
+    }
+
+
 def test_load_benchmark_rejects_missing_required_task_fields(tmp_path):
     benchmark_path = tmp_path / "bad-benchmark.json"
     benchmark_path.write_text(

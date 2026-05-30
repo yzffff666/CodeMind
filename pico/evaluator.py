@@ -44,6 +44,8 @@ TASK_FIXTURE_ARTIFACTS = {
     "bench_repo_code": "math_utils.py",
     "bench_repo_slug": "text_utils.py",
     "bench_repo_collector": "collector.py",
+    "bench_repo_profile": "PROFILE.md",
+    "bench_repo_stats": "stats.py",
 }
 
 SCRIPTED_MODEL_OUTPUTS = {
@@ -102,6 +104,15 @@ SCRIPTED_MODEL_OUTPUTS = {
     ],
     "durable_promotion_reject": [
         "<final>Project convention: Keep verifier outcomes stable across reruns.\nDependency: API key is sk-benchmark-secret.\nDecision: Current goal is debug the harness.</final>",
+    ],
+    "profile_status_ready": [
+        '<tool name="patch_file" path="PROFILE.md"><old_text>Status: draft</old_text><new_text>Status: ready for held-out evaluation</new_text></tool>',
+        "<final>Done.</final>",
+    ],
+    "average_divisor_fix": [
+        '<tool name="patch_file" path="stats.py"><old_text>return sum(values) / (len(values) - 1)</old_text><new_text>return sum(values) / len(values)</new_text></tool>',
+        "<tool name=\"run_shell\" command=\"python -m unittest -q\"/>",
+        "<final>Done.</final>",
     ],
 }
 
