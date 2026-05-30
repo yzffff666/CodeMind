@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "notes": [
+    "v2 用于扩大训练候选池，不声称是严格无泄漏评估配置。",
+    "当前 benchmark 任务较少，部分新采集轨迹与旧 eval prompt 重叠；后续正式 base-vs-SFT 评估需要新增 held-out tasks。",
+    "synthetic 数据只用于验证 pipeline，不作为真实训练证据。"
+  ],
+  "settings": {
+    "min_sft_reward": 1.0,
+    "min_dpo_gap": 0.5
+  },
+  "train": {
+    "sft_sources": [
+      {
+        "name": "text_edit_repeated_after_runtime_prompt",
+        "root": "artifacts/real-deepseek-dpo-samples-v3"
+      },
+      {
+        "name": "code_repair_repeated_stable_baseline",
+        "root": "artifacts/real-deepseek-code-repair-dpo-v3"
+      },
+      {
+        "name": "text_edit_batch_v2",
+        "root": "artifacts/real-deepseek-trajectories-v2",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-benchmark-v2.json"
+        ]
+      },
+      {
+        "name": "code_repair_suite_v2",
+        "root": "artifacts/real-deepseek-code-repair-suite-v2",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-code-repair-suite-v2-benchmark.json"
+        ]
+      },
+      {
+        "name": "readme_schema_repeated_v2",
+        "root": "artifacts/real-deepseek-readme-schema-dpo-v2"
+      },
+      {
+        "name": "slugify_repeated_v2",
+        "root": "artifacts/real-deepseek-slugify-dpo-v2"
+      }
+    ],
+    "dpo_sources": [
+      {
+        "name": "text_edit_same_prompt_preferences",
+        "root": "artifacts/real-deepseek-dpo-samples-v3"
+      },
+      {
+        "name": "code_repair_same_prompt_preferences",
+        "root": "artifacts/real-deepseek-code-repair-dpo-v3"
+      },
+      {
+        "name": "readme_schema_preferences_v2",
+        "root": "artifacts/real-deepseek-readme-schema-dpo-v2"
+      },
+      {
+        "name": "slugify_preferences_v2",
+        "root": "artifacts/real-deepseek-slugify-dpo-v2"
+      }
+    ]
+  },
+  "eval": {
+    "benchmarks": [
+      {
+        "name": "text_edit_mixed_tasks_reference_only",
+        "root": "artifacts/real-deepseek-trajectories",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-benchmark.json"
+        ],
+        "purpose": "reference eval only; prompt overlap exists with v2 train candidate pool"
+      },
+      {
+        "name": "code_repair_suite_reference_only",
+        "root": "artifacts/real-deepseek-code-repair-suite",
+        "benchmark_artifacts": [
+          "artifacts/real-deepseek-code-repair-suite-benchmark.json"
+        ],
+        "purpose": "reference eval only; prompt overlap exists with v2 train candidate pool"
+      }
+    ]
+  },
+  "excluded": [
+    {
+      "name": "synthetic_learning_demo",
+      "root": "artifacts/learning-trajectory-demo",
+      "reason": "synthetic traces validate pipeline only"
+    },
+    {
+      "name": "patch_feedback_v4",
+      "root": "artifacts/real-deepseek-code-repair-dpo-v4",
+      "reason": "matching-context feedback experiment had error migration and is not adopted as baseline"
+    }
+  ]
+}
