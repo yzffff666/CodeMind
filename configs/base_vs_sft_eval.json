@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "description": "Base-vs-SFT held-out evaluation comparison config.",
+  "base": {
+    "name": "base_deepseek_heldout_v1",
+    "artifact": "artifacts/heldout-deepseek-baseline-v1.json"
+  },
+  "sft": {
+    "name": "sft_lora_smoke_pending",
+    "artifact": "artifacts/heldout-sft-lora-smoke-v1.json"
+  },
+  "output": {
+    "markdown": "artifacts/eval/base-vs-sft-heldout-comparison.md",
+    "json": "artifacts/eval/base-vs-sft-heldout-comparison.json"
+  },
+  "metrics": [
+    "pass_rate",
+    "verifier_pass_rate",
+    "final_answer_rate",
+    "avg_reward",
+    "avg_tool_steps",
+    "failure_category_counts",
+    "quality_label_counts"
+  ],
+  "notes": [
+    "Run the same held-out benchmark for the base model and the SFT adapter.",
+    "Do not use held-out trajectories as training data.",
+    "If the SFT artifact does not exist yet, run the script with --sft-artifact pointing to an available smoke artifact or wait until SFT evaluation is produced."
+  ]
+}
