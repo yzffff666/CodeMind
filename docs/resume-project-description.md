@@ -39,6 +39,21 @@
 - 构建 train / eval split 与 held-out benchmark，避免 prompt leakage；基于 held-out baseline 定位精确指令执行失败，并设计相似但不泄漏评测集的 targeted benchmark 进行数据增强。
 - 打通从 benchmark 运行、trajectory 收集、reward 打分、SFT / DPO JSONL 导出、dry run 验证到 badcase 报告生成的闭环流程，形成可复现的 Agent 后训练数据工程方案。
 
+## 更靠近预定目标的投递版本
+
+这版适合投递 Agent 后训练、数据、SFT / DPO、模型评估相关实习岗位。写法更贴近目标 JD，强调“后训练闭环”和“可持续迭代”，但仍然保留可解释的工程落点。
+
+**CodeMind：代码 Agent 后训练数据、偏好构造与评估闭环**  
+2026年03月 - 2026年05月  
+**技术栈：** Python、Agent Harness、Tool Calling、Run Trace、Benchmark Eval、Reward Modeling、SFT、DPO、Data Curation
+
+- 面向代码 Agent 后训练场景，构建从任务运行、trajectory 采集、reward 打分、SFT / DPO 数据构造到 held-out eval 的闭环 pipeline，支持基于真实 tool-use 轨迹持续迭代 Agent 的任务完成行为。
+- 设计 Agent Harness 执行链路，打通模型适配、工具调用、上下文管理、checkpoint / resume、workspace 指纹校验与 run artifact 落盘，使每次任务的 prompt、工具调用、文件修改、verifier 结果和 stop reason 均可追踪复盘。
+- 实现面向后训练的数据清洗与 reward 规则，将 verifier pass、benchmark pass、final answer、tool failure、安全事件、路径逃逸和工具步数等信号纳入轨迹打分，自动筛选高质量 SFT 样本和低质量 rejected 样本。
+- 基于 same-prompt repeated sampling 构造 DPO preference pairs，将“完成 verifier 条件并及时 final”的轨迹作为 chosen，将“verifier 通过但未及时结束 / 工具调用失败 / 协议不合规”的轨迹作为 rejected，用于优化 Agent 的过程偏好。
+- 建立 held-out benchmark 与 badcase taxonomy，定位 `completion_without_final`、`verifier_failed`、`tool_failed`、精确指令执行失败等问题，并通过 targeted benchmark 生成相似但不泄漏评测集的训练样本。
+- 支持将真实 trajectory 导出为 SFT / DPO JSONL，并通过 dry run 验证 teacher forcing 数据格式、assistant mask 和训练样本质量，为后续 LoRA SFT、DPO 训练和 base-vs-finetuned 行为对比评估预留接口。
+
 ## 面试展开讲法
 
 ### 1. 项目背景
@@ -106,4 +121,3 @@
 - 我构建了从真实 trajectory 到 SFT / DPO 数据的 pipeline。
 - 我通过 held-out eval 和 badcase taxonomy 指导数据增强，并用 dry run 验证训练数据格式。
 - 当前重点是 Agent 后训练数据工程、reward 设计和评估闭环，而不是大规模算力训练。
-
