@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "description": "Minimal LoRA SFT smoke config for Pico agent trajectory data.",
+  "data": {
+    "train_path": "artifacts/datasets/v3/train_sft.jsonl",
+    "max_records": 18,
+    "max_seq_length": 2048
+  },
+  "model": {
+    "name_or_path": "Qwen/Qwen2.5-0.5B-Instruct",
+    "trust_remote_code": true
+  },
+  "training": {
+    "output_dir": "artifacts/models/sft-lora-smoke",
+    "epochs": 1,
+    "max_steps": 20,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 4,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.0,
+    "seed": 42,
+    "device": "auto"
+  },
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+    ]
+  },
+  "evaluation": {
+    "heldout_benchmark": "benchmarks/heldout_eval_tasks.json",
+    "baseline_artifact": "artifacts/heldout-deepseek-baseline-v1.json",
+    "comparison_plan": "run the same held-out benchmark with the base model and the SFT adapter, then compare pass rate, verifier pass rate, final-answer rate, reward, and badcase distribution"
+  }
+}
