@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Minimal LoRA SFT smoke config for Pico agent trajectory data.",
+  "description": "Minimal LoRA SFT smoke config for CodeMind agent trajectory data.",
   "data": {
     "train_path": "artifacts/datasets/v3/train_sft.jsonl",
     "max_records": 18,

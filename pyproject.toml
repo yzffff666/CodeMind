@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pico"
+name = "codemind"
 version = "0.1.0"
-description = "Small local coding agent for Ollama and OpenAI-compatible models"
+description = "Local coding agent harness with post-training data utilities"
 requires-python = ">=3.10"
 dependencies = []
 
@@ -17,7 +17,7 @@ train = [
 ]
 
 [project.scripts]
-pico = "pico.cli:main"
+codemind = "pico.cli:main"
 
 [dependency-groups]
 dev = [

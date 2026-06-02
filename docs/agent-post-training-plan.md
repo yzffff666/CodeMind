@@ -1,8 +1,8 @@
-# Pico Agent 后训练方向改进方案
+# CodeMind Agent 后训练方向改进方案
 
 ## 1. 背景与目标
 
-Pico 当前是一个面向本地代码仓库的轻量级 coding agent。它已经具备 agent 后训练项目非常重要的基础能力：
+CodeMind 当前是一个面向本地代码仓库的轻量级 coding agent。它已经具备 agent 后训练项目非常重要的基础能力：
 
 - 能在真实工作区中执行多步任务。
 - 能调用受约束的工具，例如读文件、改文件、执行命令。
@@ -29,9 +29,9 @@ Pico 当前是一个面向本地代码仓库的轻量级 coding agent。它已�
 - PyTorch、Transformers、PEFT、TRL、DeepSpeed 等训练框架经验。
 - 业务落地、数据飞轮、评估闭环和工程化能力。
 
-Pico 当前和这些要求的匹配关系如下：
+CodeMind 当前和这些要求的匹配关系如下：
 
-| JD 要求 | Pico 当前基础 | 需要补齐 |
+| JD 要求 | CodeMind 当前基础 | 需要补齐 |
 | --- | --- | --- |
 | Agent / tool-use | 已有本地 coding agent、工具调用、运行时约束 | 增加 trajectory 数据导出 |
 | 数据构建 | 已有 trace/report/task_state | 增加 SFT/DPO 数据格式转换 |
@@ -40,13 +40,13 @@ Pico 当前和这些要求的匹配关系如下：
 | SFT / DPO 实践 | 暂无训练脚本 | 增加可选 Qwen LoRA SFT/DPO demo |
 | 工程落地 | CLI、runtime、artifact 保存较完整 | 增加独立 post_training 模块和文档 |
 
-因此，Pico 更适合作为“Agent 后训练数据与评测闭环”项目，而不是“大规模训练 infra”项目。如果目标岗位偏千卡训练、Megatron、NCCL、CUDA、FSDP，则还需要另起一条训练系统路线；如果目标岗位偏 Agent 后训练、SFT/DPO 数据、应用算法、评测体系，Pico 的改造方向是匹配的。
+因此，CodeMind 更适合作为“Agent 后训练数据与评测闭环”项目，而不是“大规模训练 infra”项目。如果目标岗位偏千卡训练、Megatron、NCCL、CUDA、FSDP，则还需要另起一条训练系统路线；如果目标岗位偏 Agent 后训练、SFT/DPO 数据、应用算法、评测体系，CodeMind 的改造方向是匹配的。
 
 ## 3. 总体改进思路
 
 建议采用“旁路增强”的方式，不修改现有核心 agent 逻辑。
 
-现有 `pico/` 包继续负责：
+现有 `core agent package/` 包继续负责：
 
 - agent runtime
 - tool execution
@@ -67,13 +67,13 @@ Pico 当前和这些要求的匹配关系如下：
 
 - 不破坏原项目稳定性。
 - 项目边界更清楚，方便面试讲解。
-- 可以先用已有 `.pico/runs` 数据做离线处理。
+- 可以先用已有 `.core agent package/runs` 数据做离线处理。
 - 后续如果要接入真实模型训练，也能自然扩展。
 
 ## 4. 推荐新增目录结构
 
 ```text
-pico/
+core agent package/
   post_training/
     __init__.py
     schemas.py
@@ -115,9 +115,9 @@ pico/
 输入：
 
 ```text
-.pico/runs/<run_id>/trace.jsonl
-.pico/runs/<run_id>/report.json
-.pico/runs/<run_id>/task_state.json
+.core agent package/runs/<run_id>/trace.jsonl
+.core agent package/runs/<run_id>/report.json
+task_state.json
 ```
 
 职责：
@@ -212,7 +212,7 @@ completion_penalty:
     "task_id": "...",
     "reward": 1.2,
     "tool_steps": 3,
-    "source": "pico_trace"
+    "source": "codemind_trace"
   }
 }
 ```
@@ -337,7 +337,7 @@ agent trace -> SFT dataset -> LoRA SFT -> DPO pairs -> DPO training -> benchmark
 
 验收标准：
 
-- 能从 `.pico/runs` 读取已有 run。
+- 能从 `.core agent package/runs` 读取已有 run。
 - 能导出 SFT JSONL。
 - 能导出 DPO JSONL。
 - 能生成 summary report。
@@ -431,7 +431,7 @@ run benchmark
 
 ## 9. 20-30 天最小学习与项目推进计划
 
-这一阶段的目标不是系统学习所有后训练知识，而是围绕 Pico 项目快速补齐能支撑实习面试的最小知识闭环：
+这一阶段的目标不是系统学习所有后训练知识，而是围绕 CodeMind 项目快速补齐能支撑实习面试的最小知识闭环：
 
 ```text
 SFT / DPO 基础
@@ -482,7 +482,7 @@ SFT / DPO 基础
 
 面试表达：
 
-> Pico 的运行 trace 记录了 agent 的多步工具调用过程，因此可以把成功轨迹转为 SFT 样本，把成功/失败轨迹转为 DPO preference pairs。
+> CodeMind 的运行 trace 记录了 agent 的多步工具调用过程，因此可以把成功轨迹转为 SFT 样本，把成功/失败轨迹转为 DPO preference pairs。
 
 #### 第 4-8 天：实现 trace 到 SFT/DPO 的数据管线
 
@@ -514,7 +514,7 @@ artifacts/datasets/
 
 最低验收标准：
 
-- 能扫描 `.pico/runs`。
+- 能扫描 `.core agent package/runs`。
 - 能读取 `trace.jsonl`、`report.json`、`task_state.json`。
 - 能导出至少一份 SFT sample。
 - 能导出至少一份 DPO pair sample。
@@ -670,10 +670,10 @@ OpenRLHF DPO
 - 知乎/博客：DPO 原理、RLHF 流程、PEFT LoRA。
 - GitHub：Qwen examples、PEFT、TRL、LLaMA-Factory、OpenRLHF。
 
-学习时要始终围绕 Pico 的主线：
+学习时要始终围绕 CodeMind 的主线：
 
 ```text
-Pico agent 运行轨迹
+CodeMind agent 运行轨迹
   -> trace 解析
   -> SFT 数据构建
   -> DPO preference pair
@@ -843,7 +843,7 @@ real project task traces
 
 解决方案：
 
-- 保持 `pico/` 核心 agent 不动。
+- 保持 `core agent package/` 核心 agent 不动。
 - 用 `post_training/` 做离线处理。
 - 用 `experiments/` 做训练 demo。
 
@@ -860,7 +860,7 @@ real project task traces
 
 ## 12. 结论
 
-Pico 很适合向 Agent 后训练方向扩展。它已经有 agent runtime、tool-use trace、benchmark、verifier 和 metrics，这些正是构建后训练数据闭环的关键基础。
+CodeMind 很适合向 Agent 后训练方向扩展。它已经有 agent runtime、tool-use trace、benchmark、verifier 和 metrics，这些正是构建后训练数据闭环的关键基础。
 
 最合适的改进路线不是重写现有项目，而是在旁路新增 `post_training/` 模块：
 

@@ -12,7 +12,7 @@
 - **任务恢复：** 实现 checkpoint / resume 与 workspace 漂移校验，记录任务状态、工具调用结果、上下文摘要和工作区指纹，在会话中断、上下文超预算或文件变更后判断旧状态是否仍可复用；覆盖 10 个恢复场景，workspace 漂移识别率达到 100%。
 - **工具安全治理：** 将文件读取、代码搜索、Shell 执行、文件写入和 Patch 修改等工具收口到统一执行网关，加入参数校验、路径逃逸防护、高风险操作审批、重复调用拦截和敏感信息脱敏，降低模型误调用工具带来的副作用风险。
 - **评测闭环：** 建立 run trace 与 benchmark 评测体系，聚合每次任务的工具调用、prompt 长度、失败类型、恢复结果和任务完成情况，对比上下文压缩、记忆策略和恢复机制的实际收益，避免仅凭主观体验判断 Agent 效果。
-- **后训练数据闭环：** 基于真实 Agent 运行轨迹构建 SFT / DPO 数据处理链路，从 `.pico/runs/*` 中解析 tool-use trajectory、verifier 结果、stop reason、tool error 和安全事件，设计 rule-based reward 自动筛选 SFT candidates，并通过 same-prompt repeated sampling 构造 DPO chosen / rejected pairs。
+- **后训练数据闭环：** 基于真实 Agent 运行轨迹构建 SFT / DPO 数据处理链路，从 `.core agent package/runs/*` 中解析 tool-use trajectory、verifier 结果、stop reason、tool error 和安全事件，设计 rule-based reward 自动筛选 SFT candidates，并通过 same-prompt repeated sampling 构造 DPO chosen / rejected pairs。
 - **数据增强与偏好构造：** 针对 held-out eval 中暴露的 `completion_without_final`、`verifier_failed` 和精确指令执行失败等 badcase，设计相似但不泄漏评测集的 targeted benchmark；通过 repeated sampling 将“完成 verifier 条件并及时 final”的轨迹作为 chosen，将“完成修改但未及时 final”的轨迹作为 rejected，形成面向 Agent 行为偏好的训练数据。
 
 ## 更适合一页简历的压缩版本
@@ -74,7 +74,7 @@
 
 ### 5. 后训练扩展
 
-在 Harness 之上，我又做了后训练数据 pipeline：从 `.pico/runs/*` 中加载 trajectory，结合 verifier、stop reason、tool error 和安全事件做 rule-based reward。高质量成功轨迹导出为 SFT；同 prompt 下 reward 差距明显的轨迹构造成 DPO pair。
+在 Harness 之上，我又做了后训练数据 pipeline：从 `.core agent package/runs/*` 中加载 trajectory，结合 verifier、stop reason、tool error 和安全事件做 rule-based reward。高质量成功轨迹导出为 SFT；同 prompt 下 reward 差距明显的轨迹构造成 DPO pair。
 
 ### 6. Badcase 到数据增强
 

@@ -4,10 +4,10 @@
 
 ## 当前项目状态
 
-Pico 目前已经具备 agent 后训练数据闭环的核心组件：
+CodeMind 目前已经具备 agent 后训练数据闭环的核心组件：
 
 - 能针对文本编辑和代码修复任务采集真实 DeepSeek trajectory。
-- 能从 `.pico/runs/*` artifacts 中加载 trace、report 和 task_state。
+- 能从 `.core agent package/runs/*` artifacts 中加载 trace、report 和 task_state。
 - 能基于任务完成、verifier 结果、安全性和工具步数做规则 reward 打分。
 - 能从干净的成功轨迹中导出 SFT candidate。
 - 能从同 prompt 的不同轨迹中构造带 reward gap 的 DPO pair。

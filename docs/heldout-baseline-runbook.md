@@ -25,7 +25,7 @@ C:\Users\13670\AppData\Local\Programs\Python\Python311\python.exe scripts\run_he
 成功后会生成：
 
 - `artifacts/heldout-deepseek-baseline-v1.json`
-- `artifacts/heldout-deepseek-baseline-v1/**/.pico/runs/*`
+- `artifacts/heldout-deepseek-baseline-v1/**/.core agent package/runs/*`
 
 ## 看结果
 
